@@ -5,6 +5,12 @@ pub struct NachaFile {
     pub file_control: FileControl,
 }
 
+impl NachaFile {
+    pub fn last_batch(&mut self) -> &mut Batch {
+        return self.batches.last_mut().unwrap();
+    }
+}
+
 #[derive(Debug, Default)]
 pub struct FileHeader {
     pub record_type_code: String,
@@ -40,14 +46,22 @@ impl FileHeader {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Batch {
     pub batch_header: BatchHeader,
     pub detail_entries: Vec<DetailEntry>,
     // batch_control: BatchControl,
 }
 
-#[derive(Debug, Default)]
+impl Batch {
+    pub fn new_entry(&mut self) -> &mut DetailEntry {
+        let detail: DetailEntry = Default::default();
+        self.detail_entries.push(detail);
+        return self.detail_entries.last_mut().unwrap();
+    }
+}
+
+#[derive(Debug, Default, Clone)]
 pub struct BatchHeader {
     pub record_type_code: String,
     pub service_class_code: String,
@@ -82,9 +96,35 @@ impl BatchHeader {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct DetailEntry {
-    pub x: String,
+    pub record_type_code: String,
+    pub transaction_code: String,
+    pub receiving_dfi_id: String,
+    pub check_digit: String,
+    pub dfi_account_number: String,
+    pub amount: String,
+    pub individual_id_number: String,
+    pub individual_name: String,
+    pub discretionary_data: String,
+    pub addenda_record_indicator: String,
+    pub trace_number: String,
+}
+
+impl DetailEntry {
+    pub fn parse(&mut self, line: String) {
+        self.record_type_code = line[0..1].to_string();
+        self.transaction_code = line[1..3].to_string();
+        self.receiving_dfi_id = line[3..11].to_string();
+        self.check_digit = line[11..12].to_string();
+        self.dfi_account_number = line[12..29].to_string();
+        self.amount = line[29..39].to_string();
+        self.individual_id_number = line[39..54].to_string();
+        self.individual_name = line[54..76].to_string();
+        self.discretionary_data = line[76..78].to_string();
+        self.addenda_record_indicator = line[78..79].to_string();
+        self.trace_number = line[79..94].to_string();
+    }
 }
 
 #[derive(Debug, Default)]

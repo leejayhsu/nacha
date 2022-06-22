@@ -18,13 +18,17 @@ fn main() {
                 file.file_header.parse(line);
             }
             "5" => {
-                println!("entry detail found");
+                println!("batch header found");
                 let mut batch: types::Batch = Default::default();
                 batch.batch_header = types::BatchHeader {
                     ..Default::default()
                 };
                 batch.batch_header.parse(line);
                 file.batches.push(batch);
+            }
+            "6" => {
+                println!("detail entry found");
+                file.last_batch().new_entry().parse(line);
             }
             "9" => {
                 println!("file control found");
@@ -39,5 +43,5 @@ fn main() {
     }
 
     println!("Done parsing file");
-    println!("{:?}", file);
+    println!("{:#?}", file);
 }
