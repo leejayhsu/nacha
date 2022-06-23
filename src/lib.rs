@@ -1,6 +1,5 @@
 use log::{debug, info};
-use std::io::BufRead;
-use std::{fs::File, io::BufReader};
+
 #[derive(Debug, Default)]
 pub struct NachaFile {
     pub file_header: FileHeader,
@@ -9,17 +8,21 @@ pub struct NachaFile {
 }
 
 impl NachaFile {
-    pub fn parse(&mut self, nacha_file: BufReader<File>) {
-        for line in nacha_file.lines() {
-            let line = line.unwrap();
+    pub fn new(content: String) -> NachaFile {
+        let mut file = NachaFile {
+            ..Default::default()
+        };
+
+        for linestr in content.lines() {
+            let line = linestr.to_string();
             let record_type = &line[0..1];
             match record_type {
                 "1" => {
                     debug!("file header found");
-                    self.file_header = FileHeader {
+                    file.file_header = FileHeader {
                         ..Default::default()
                     };
-                    self.file_header.parse(line);
+                    file.file_header.parse(line);
                 }
                 "5" => {
                     debug!("batch header found");
@@ -28,29 +31,30 @@ impl NachaFile {
                         ..Default::default()
                     };
                     batch.batch_header.parse(line);
-                    self.batches.push(batch);
+                    file.batches.push(batch);
                 }
                 "6" => {
                     debug!("detail entry found");
-                    self.last_batch().new_entry().parse(line);
+                    file.last_batch().new_entry().parse(line);
                 }
                 "7" => {
                     debug!("addendum entry found");
-                    self.last_batch().last_entry().new_addenda().parse(line);
+                    file.last_batch().last_entry().new_addenda().parse(line);
                 }
                 "9" => {
                     debug!("file control found");
-                    self.file_control = FileControl {
+                    file.file_control = FileControl {
                         ..Default::default()
                     };
-                    self.file_control.parse(line);
+                    file.file_control.parse(line);
                     break;
                 }
                 _ => debug!("unknown record found"),
             }
         }
         info!("Done parsing file");
-        info!("{:#?}", self);
+        info!("{:#?}", file);
+        return file;
     }
 
     pub fn last_batch(&mut self) -> &mut Batch {
