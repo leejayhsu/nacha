@@ -10,7 +10,7 @@ pub struct NachaFile {
     pub batches: Vec<Batch>,
     pub file_control: Option<FileControl>,
 }
-
+// todo: make all datetimes Option<> because they aren't guaranteed to exist in nacha file
 impl NachaFile {
     pub fn new(content: String) -> NachaFile {
         let mut file = NachaFile {
