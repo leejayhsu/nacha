@@ -1,3 +1,6 @@
+use log::{debug, info};
+use std::io::BufRead;
+use std::{fs::File, io::BufReader};
 #[derive(Debug, Default)]
 pub struct NachaFile {
     pub file_header: FileHeader,
@@ -6,6 +9,50 @@ pub struct NachaFile {
 }
 
 impl NachaFile {
+    pub fn parse(&mut self, nacha_file: BufReader<File>) {
+        for line in nacha_file.lines() {
+            let line = line.unwrap();
+            let record_type = &line[0..1];
+            match record_type {
+                "1" => {
+                    debug!("file header found");
+                    self.file_header = FileHeader {
+                        ..Default::default()
+                    };
+                    self.file_header.parse(line);
+                }
+                "5" => {
+                    debug!("batch header found");
+                    let mut batch: Batch = Default::default();
+                    batch.batch_header = BatchHeader {
+                        ..Default::default()
+                    };
+                    batch.batch_header.parse(line);
+                    self.batches.push(batch);
+                }
+                "6" => {
+                    debug!("detail entry found");
+                    self.last_batch().new_entry().parse(line);
+                }
+                "7" => {
+                    debug!("addendum entry found");
+                    self.last_batch().last_entry().new_addenda().parse(line);
+                }
+                "9" => {
+                    debug!("file control found");
+                    self.file_control = FileControl {
+                        ..Default::default()
+                    };
+                    self.file_control.parse(line);
+                    break;
+                }
+                _ => debug!("unknown record found"),
+            }
+        }
+        info!("Done parsing file");
+        info!("{:#?}", self);
+    }
+
     pub fn last_batch(&mut self) -> &mut Batch {
         return self.batches.last_mut().unwrap();
     }
