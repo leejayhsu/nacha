@@ -1,5 +1,5 @@
 #![allow(unused)]
-use chrono::{DateTime, NaiveDate, NaiveTime, Utc};
+use chrono::{DateTime, NaiveDate, NaiveTime, ParseError, Utc};
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
 
@@ -66,8 +66,8 @@ pub struct FileHeader {
     pub priority_code: String,
     pub immediate_destination: String,
     pub immediate_origin: String,
-    pub file_creation_date: NaiveDate,
-    pub file_creation_time: NaiveTime,
+    pub file_creation_date: Option<NaiveDate>,
+    pub file_creation_time: Option<NaiveTime>,
     pub file_id_modifier: String,
     pub record_size: String,
     pub blocking_factor: String,
@@ -79,13 +79,24 @@ pub struct FileHeader {
 
 impl FileHeader {
     pub fn parse(line: String) -> FileHeader {
+        let maybe_date = NaiveDate::parse_from_str(line[23..29].trim(), "%y%m%d");
+        let date = match maybe_date {
+            Ok(d) => Some(d),
+            Err(e) => None,
+        };
+        let maybe_time = NaiveTime::parse_from_str(line[29..33].trim(), "%H%M");
+        let time = match maybe_time {
+            Ok(t) => Some(t),
+            Err(e) => None,
+        };
+
         let fh = FileHeader {
             record_type_code: line[0..1].trim().to_string(),
             priority_code: line[1..3].trim().to_string(),
             immediate_destination: line[3..13].trim().to_string(),
             immediate_origin: line[13..23].trim().to_string(),
-            file_creation_date: NaiveDate::parse_from_str(line[23..29].trim(), "%y%m%d").unwrap(),
-            file_creation_time: NaiveTime::parse_from_str(line[29..33].trim(), "%H%M").unwrap(),
+            file_creation_date: date,
+            file_creation_time: time,
             file_id_modifier: line[33..34].trim().to_string(),
             record_size: line[34..37].trim().to_string(),
             blocking_factor: line[37..39].trim().to_string(),
@@ -126,8 +137,8 @@ pub struct BatchHeader {
     pub standard_entry_class_code: String,
     pub company_entry_description: String,
     pub company_descriptive_date: String,
-    pub effective_entry_date: NaiveDate,
-    pub settlement_date: NaiveDate,
+    pub effective_entry_date: Option<NaiveDate>,
+    pub settlement_date: Option<NaiveDate>,
     pub originator_status_code: String,
     pub originating_dfi_id: String,
     pub batch_number: String,
@@ -135,6 +146,17 @@ pub struct BatchHeader {
 
 impl BatchHeader {
     pub fn parse(line: String) -> BatchHeader {
+        let maybe_effective_date = NaiveDate::parse_from_str(line[69..75].trim(), "%y%m%d");
+        let edate = match maybe_effective_date {
+            Ok(d) => Some(d),
+            Err(e) => None,
+        };
+        let maybe_settlement_date = NaiveDate::parse_from_str(line[75..78].trim(), "%y%m%d");
+        let sdate = match maybe_settlement_date {
+            Ok(d) => Some(d),
+            Err(e) => None,
+        };
+
         let bh = BatchHeader {
             record_type_code: line[0..1].trim().to_string(),
             service_class_code: line[1..4].trim().to_string(),
@@ -144,8 +166,8 @@ impl BatchHeader {
             standard_entry_class_code: line[50..53].trim().to_string(),
             company_entry_description: line[53..63].trim().to_string(),
             company_descriptive_date: line[63..69].trim().to_string(),
-            effective_entry_date: NaiveDate::parse_from_str(line[69..75].trim(), "%y%m%d").unwrap(),
-            settlement_date: NaiveDate::parse_from_str(line[75..78].trim(), "%y%m%d").unwrap(),
+            effective_entry_date: edate,
+            settlement_date: sdate,
             originator_status_code: line[78..79].trim().to_string(),
             originating_dfi_id: line[79..87].trim().to_string(),
             batch_number: line[87..94].trim().to_string(),
