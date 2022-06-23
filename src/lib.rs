@@ -1,5 +1,5 @@
 #![allow(unused)]
-use chrono::{DateTime, NaiveDate, Utc};
+use chrono::{DateTime, NaiveDate, NaiveTime, Utc};
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
 
@@ -67,7 +67,7 @@ pub struct FileHeader {
     pub immediate_destination: String,
     pub immediate_origin: String,
     pub file_creation_date: NaiveDate,
-    pub file_creation_time: String,
+    pub file_creation_time: NaiveTime,
     pub file_id_modifier: String,
     pub record_size: String,
     pub blocking_factor: String,
@@ -79,14 +79,13 @@ pub struct FileHeader {
 
 impl FileHeader {
     pub fn parse(line: String) -> FileHeader {
-        let date = line[23..29].trim();
         let fh = FileHeader {
             record_type_code: line[0..1].trim().to_string(),
             priority_code: line[1..3].trim().to_string(),
             immediate_destination: line[3..13].trim().to_string(),
             immediate_origin: line[13..23].trim().to_string(),
-            file_creation_date: NaiveDate::parse_from_str(date, "%y%m%d").unwrap(),
-            file_creation_time: line[29..33].trim().to_string(),
+            file_creation_date: NaiveDate::parse_from_str(line[23..29].trim(), "%y%m%d").unwrap(),
+            file_creation_time: NaiveTime::parse_from_str(line[29..33].trim(), "%H%M").unwrap(),
             file_id_modifier: line[33..34].trim().to_string(),
             record_size: line[34..37].trim().to_string(),
             blocking_factor: line[37..39].trim().to_string(),
@@ -127,8 +126,8 @@ pub struct BatchHeader {
     pub standard_entry_class_code: String,
     pub company_entry_description: String,
     pub company_descriptive_date: String,
-    pub effective_entry_date: String,
-    pub settlement_date: String,
+    pub effective_entry_date: NaiveDate,
+    pub settlement_date: NaiveDate,
     pub originator_status_code: String,
     pub originating_dfi_id: String,
     pub batch_number: String,
@@ -145,8 +144,8 @@ impl BatchHeader {
             standard_entry_class_code: line[50..53].trim().to_string(),
             company_entry_description: line[53..63].trim().to_string(),
             company_descriptive_date: line[63..69].trim().to_string(),
-            effective_entry_date: line[69..75].trim().to_string(),
-            settlement_date: line[75..78].trim().to_string(),
+            effective_entry_date: NaiveDate::parse_from_str(line[69..75].trim(), "%y%m%d").unwrap(),
+            settlement_date: NaiveDate::parse_from_str(line[75..78].trim(), "%y%m%d").unwrap(),
             originator_status_code: line[78..79].trim().to_string(),
             originating_dfi_id: line[79..87].trim().to_string(),
             batch_number: line[87..94].trim().to_string(),
