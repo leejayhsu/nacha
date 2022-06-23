@@ -46,7 +46,7 @@ impl FileHeader {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default)]
 pub struct Batch {
     pub batch_header: BatchHeader,
     pub detail_entries: Vec<DetailEntry>,
@@ -59,9 +59,13 @@ impl Batch {
         self.detail_entries.push(detail);
         return self.detail_entries.last_mut().unwrap();
     }
+
+    pub fn last_entry(&mut self) -> &mut DetailEntry {
+        return self.detail_entries.last_mut().unwrap();
+    }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default)]
 pub struct BatchHeader {
     pub record_type_code: String,
     pub service_class_code: String,
@@ -96,7 +100,7 @@ impl BatchHeader {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default)]
 pub struct DetailEntry {
     pub record_type_code: String,
     pub transaction_code: String,
@@ -109,6 +113,7 @@ pub struct DetailEntry {
     pub discretionary_data: String,
     pub addenda_record_indicator: String,
     pub trace_number: String,
+    pub addenda: Vec<Addendum>,
 }
 
 impl DetailEntry {
@@ -124,6 +129,31 @@ impl DetailEntry {
         self.discretionary_data = line[76..78].to_string();
         self.addenda_record_indicator = line[78..79].to_string();
         self.trace_number = line[79..94].to_string();
+    }
+
+    pub fn new_addenda(&mut self) -> &mut Addendum {
+        let addendum: Addendum = Default::default();
+        self.addenda.push(addendum);
+        return self.addenda.last_mut().unwrap();
+    }
+}
+
+#[derive(Debug, Default)]
+pub struct Addendum {
+    record_type_code: String,
+    addenda_type_code: String,
+    payment_related_info: String,
+    addenda_sequence_number: String,
+    entry_detail_sequence_number: String,
+}
+
+impl Addendum {
+    pub fn parse(&mut self, line: String) {
+        self.record_type_code = line[0..1].to_string();
+        self.addenda_type_code = line[1..3].to_string();
+        self.payment_related_info = line[3..83].to_string();
+        self.addenda_sequence_number = line[83..87].to_string();
+        self.entry_detail_sequence_number = line[87..94].to_string();
     }
 }
 

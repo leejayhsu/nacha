@@ -30,6 +30,10 @@ fn main() {
                 println!("detail entry found");
                 file.last_batch().new_entry().parse(line);
             }
+            "7" => {
+                println!("addendum entry found");
+                file.last_batch().last_entry().new_addenda().parse(line);
+            }
             "9" => {
                 println!("file control found");
                 file.file_control = types::FileControl {
