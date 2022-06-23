@@ -159,7 +159,7 @@ pub struct DetailEntry {
     pub receiving_dfi_id: String,
     pub check_digit: String,
     pub dfi_account_number: String,
-    pub amount: String,
+    pub amount: i32,
     pub individual_id_number: String,
     pub individual_name: String,
     pub discretionary_data: String,
@@ -175,7 +175,7 @@ impl DetailEntry {
         self.receiving_dfi_id = line[3..11].trim().to_string();
         self.check_digit = line[11..12].trim().to_string();
         self.dfi_account_number = line[12..29].trim().to_string();
-        self.amount = line[29..39].trim().to_string();
+        self.amount = line[29..39].trim().parse().unwrap();
         self.individual_id_number = line[39..54].trim().to_string();
         self.individual_name = line[54..76].trim().to_string();
         self.discretionary_data = line[76..78].trim().to_string();
@@ -212,24 +212,24 @@ impl Addendum {
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct FileControl {
     pub record_type_code: String,
-    pub batch_count: String,
-    pub block_count: String,
-    pub entry_and_addenda_count: String,
+    pub batch_count: i32,
+    pub block_count: i32,
+    pub entry_and_addenda_count: i32,
     pub entry_hash: String,
-    pub total_debit: String,
-    pub total_credit: String,
+    pub total_debit: i32,
+    pub total_credit: i32,
     pub reserved: String,
 }
 
 impl FileControl {
     pub fn parse(&mut self, line: String) {
         self.record_type_code = line[0..1].trim().to_string();
-        self.batch_count = line[1..7].trim().to_string();
-        self.block_count = line[7..13].trim().to_string();
-        self.entry_and_addenda_count = line[13..21].trim().to_string();
+        self.batch_count = line[1..7].trim().parse().unwrap();
+        self.block_count = line[7..13].trim().parse().unwrap();
+        self.entry_and_addenda_count = line[13..21].trim().parse().unwrap();
         self.entry_hash = line[21..31].trim().to_string();
-        self.total_debit = line[31..43].trim().to_string();
-        self.total_credit = line[43..55].trim().to_string();
+        self.total_debit = line[31..43].trim().parse().unwrap();
+        self.total_credit = line[43..55].trim().parse().unwrap();
         self.reserved = line[55..94].trim().to_string();
     }
 }
