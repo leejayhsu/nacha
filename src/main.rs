@@ -16,7 +16,7 @@ struct Cli {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let env = Env::default()
-        .filter_or("LOG_LEVEL", "trace")
+        .filter_or("LOG_LEVEL", "warning")
         .write_style_or("LOG_STYLE", "always");
     env_logger::init_from_env(env);
 
@@ -25,6 +25,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let content = std::fs::read_to_string(&args.path)
         .with_context(|| format!("could not read file `{}`", &args.path.display()))?;
 
-    lib::NachaFile::new(content);
+    let nacha_file = lib::NachaFile::new(content);
+    let serialized = serde_json::to_string_pretty(&nacha_file).unwrap();
+    println!("{}", serialized);
     Ok(())
 }

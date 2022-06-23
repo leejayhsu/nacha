@@ -1,6 +1,8 @@
 use log::{debug, info};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
+
 pub struct NachaFile {
     pub file_header: FileHeader,
     pub batches: Vec<Batch>,
@@ -53,7 +55,6 @@ impl NachaFile {
             }
         }
         info!("Done parsing file");
-        info!("{:#?}", file);
         return file;
     }
 
@@ -62,7 +63,7 @@ impl NachaFile {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct FileHeader {
     pub record_type_code: String,
     pub priority_code: String,
@@ -97,7 +98,7 @@ impl FileHeader {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Batch {
     pub batch_header: BatchHeader,
     pub detail_entries: Vec<DetailEntry>,
@@ -116,7 +117,7 @@ impl Batch {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct BatchHeader {
     pub record_type_code: String,
     pub service_class_code: String,
@@ -151,7 +152,7 @@ impl BatchHeader {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct DetailEntry {
     pub record_type_code: String,
     pub transaction_code: String,
@@ -189,7 +190,7 @@ impl DetailEntry {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Addendum {
     record_type_code: String,
     addenda_type_code: String,
@@ -208,7 +209,7 @@ impl Addendum {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct FileControl {
     pub record_type_code: String,
     pub batch_count: String,
