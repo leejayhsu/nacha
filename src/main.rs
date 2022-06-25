@@ -1,11 +1,15 @@
 #![allow(unused)]
 
-mod lib;
-use std::{ffi::OsStr, fs::File, io::Write, path::PathBuf};
-
+use crate::term::run;
 use anyhow::{Context, Result};
 use clap::Parser;
 use env_logger::Env;
+use std::{error::Error, time::Duration};
+use std::{ffi::OsStr, fs::File, io::Write, path::PathBuf};
+mod app;
+mod lib;
+mod term;
+mod ui;
 
 /// Parse a NACHA file into a rust object
 #[derive(Parser)]
@@ -62,6 +66,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let nacha_file = lib::NachaFile::new(content);
 
     cli.output(&nacha_file);
-
+    let tick_rate = Duration::from_millis(1000);
+    run(tick_rate, nacha_file)?;
     Ok(())
 }

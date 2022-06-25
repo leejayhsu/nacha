@@ -6,17 +6,17 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 
 pub struct NachaFile {
-    pub file_header: Option<FileHeader>,
+    pub file_header: FileHeader,
     pub batches: Vec<Batch>,
-    pub file_control: Option<FileControl>,
+    pub file_control: FileControl,
 }
 // todo: make all datetimes Option<> because they aren't guaranteed to exist in nacha file
 impl NachaFile {
     pub fn new(content: String) -> NachaFile {
         let mut file = NachaFile {
-            file_header: None,
+            file_header: FileHeader::new(),
             batches: Vec::new(),
-            file_control: None,
+            file_control: FileControl::new(),
         };
 
         for linestr in content.lines() {
@@ -25,7 +25,7 @@ impl NachaFile {
             match record_type {
                 "1" => {
                     debug!("file header found");
-                    file.file_header = Some(FileHeader::parse(line))
+                    file.file_header.parse(line);
                 }
                 "5" => {
                     debug!("batch header found");
@@ -45,7 +45,7 @@ impl NachaFile {
                 }
                 "9" => {
                     debug!("file control found");
-                    file.file_control = Some(FileControl::parse(line));
+                    file.file_control.parse(line);
                     break;
                 }
                 _ => debug!("unknown record found"),
@@ -78,7 +78,24 @@ pub struct FileHeader {
 }
 
 impl FileHeader {
-    pub fn parse(line: String) -> FileHeader {
+    pub fn new() -> FileHeader {
+        FileHeader {
+            record_type_code: "".to_string(),
+            priority_code: "".to_string(),
+            immediate_destination: "".to_string(),
+            immediate_origin: "".to_string(),
+            file_creation_date: None,
+            file_creation_time: None,
+            file_id_modifier: "".to_string(),
+            record_size: "".to_string(),
+            blocking_factor: "".to_string(),
+            format_code: "".to_string(),
+            immediate_destination_name: "".to_string(),
+            immediate_origin_name: "".to_string(),
+            reference_code: "".to_string(),
+        }
+    }
+    pub fn parse(&mut self, line: String) {
         let maybe_date = NaiveDate::parse_from_str(line[23..29].trim(), "%y%m%d");
         let date = match maybe_date {
             Ok(d) => Some(d),
@@ -90,22 +107,19 @@ impl FileHeader {
             Err(e) => None,
         };
 
-        let fh = FileHeader {
-            record_type_code: line[0..1].trim().to_string(),
-            priority_code: line[1..3].trim().to_string(),
-            immediate_destination: line[3..13].trim().to_string(),
-            immediate_origin: line[13..23].trim().to_string(),
-            file_creation_date: date,
-            file_creation_time: time,
-            file_id_modifier: line[33..34].trim().to_string(),
-            record_size: line[34..37].trim().to_string(),
-            blocking_factor: line[37..39].trim().to_string(),
-            format_code: line[39..40].trim().to_string(),
-            immediate_destination_name: line[40..63].trim().to_string(),
-            immediate_origin_name: line[63..86].trim().to_string(),
-            reference_code: line[86..94].trim().to_string(),
-        };
-        return fh;
+        self.record_type_code = line[0..1].trim().to_string();
+        self.priority_code = line[1..3].trim().to_string();
+        self.immediate_destination = line[3..13].trim().to_string();
+        self.immediate_origin = line[13..23].trim().to_string();
+        self.file_creation_date = date;
+        self.file_creation_time = time;
+        self.file_id_modifier = line[33..34].trim().to_string();
+        self.record_size = line[34..37].trim().to_string();
+        self.blocking_factor = line[37..39].trim().to_string();
+        self.format_code = line[39..40].trim().to_string();
+        self.immediate_destination_name = line[40..63].trim().to_string();
+        self.immediate_origin_name = line[63..86].trim().to_string();
+        self.reference_code = line[86..94].trim().to_string();
     }
 }
 
@@ -252,17 +266,26 @@ pub struct FileControl {
 }
 
 impl FileControl {
-    pub fn parse(line: String) -> FileControl {
-        let fc = FileControl {
-            record_type_code: line[0..1].trim().to_string(),
-            batch_count: line[1..7].trim().parse().unwrap(),
-            block_count: line[7..13].trim().parse().unwrap(),
-            entry_and_addenda_count: line[13..21].trim().parse().unwrap(),
-            entry_hash: line[21..31].trim().to_string(),
-            total_debit: line[31..43].trim().parse().unwrap(),
-            total_credit: line[43..55].trim().parse().unwrap(),
-            reserved: line[55..94].trim().to_string(),
-        };
-        return fc;
+    pub fn new() -> FileControl {
+        FileControl {
+            record_type_code: "".to_string(),
+            batch_count: 0,
+            block_count: 0,
+            entry_and_addenda_count: 0,
+            entry_hash: "".to_string(),
+            total_debit: 0,
+            total_credit: 0,
+            reserved: "".to_string(),
+        }
+    }
+    pub fn parse(&mut self, line: String) {
+        self.record_type_code = line[0..1].trim().to_string();
+        self.batch_count = line[1..7].trim().parse().unwrap();
+        self.block_count = line[7..13].trim().parse().unwrap();
+        self.entry_and_addenda_count = line[13..21].trim().parse().unwrap();
+        self.entry_hash = line[21..31].trim().to_string();
+        self.total_debit = line[31..43].trim().parse().unwrap();
+        self.total_credit = line[43..55].trim().parse().unwrap();
+        self.reserved = line[55..94].trim().to_string();
     }
 }
