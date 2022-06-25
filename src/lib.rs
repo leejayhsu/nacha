@@ -71,6 +71,17 @@ impl NachaFile {
     pub fn get_raw(&self) -> String {
         return self.raw.clone();
     }
+
+    pub fn get_entries(&mut self) -> Vec<&DetailEntry> {
+        let mut entries = Vec::new();
+        // let batches = self.batches.iter();
+        for batch in &self.batches {
+            for entry in &batch.detail_entries {
+                entries.push(entry);
+            }
+        }
+        return entries;
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

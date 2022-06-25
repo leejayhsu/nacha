@@ -1,4 +1,5 @@
 use crate::app::App;
+use crate::lib::DetailEntry;
 use thousands::Separable;
 use tui::{
     backend::Backend,
@@ -171,13 +172,44 @@ where
     // let text = vec![Spans::from(
     //     app.nacha_file.batches[0].detail_entries[0].as_json(),
     // )];
-    let text = vec![Spans::from(app.nacha_file.get_raw())];
-    let block = Block::default().borders(Borders::ALL).title(Span::styled(
-        "File Contents",
-        Style::default()
-            .fg(Color::Magenta)
-            .add_modifier(Modifier::BOLD),
-    ));
-    let paragraph = Paragraph::new(text).block(block).wrap(Wrap { trim: true });
-    f.render_widget(paragraph, area);
+
+    (1..10).filter(|x| x % 2 == 0).collect::<Vec<u32>>();
+
+    // let mut entries: Vec<DetailEntry> = Vec::new();
+    // // let slice = &app.nacha_file.batches[..];
+    // for batch in std::iter::IntoIterator::into_iter(app.nacha_file.batches) {
+    //     for entry in batch.detail_entries {
+    //         entries.push(entry);
+    //     }
+    // }
+    let entries = app.nacha_file.get_entries();
+    // let amounts: Vec<i32> = entries.iter().map(|x| x.amount).collect();
+    // let names: Vec<String> = entries.iter().map(|x| x.individual_name).collect();
+    // let trace_numbers: Vec<String> = entries.iter().map(|x| x.trace_number).collect();
+    // let transaction_codes: Vec<String> = entries.iter().map(|x| x.transaction_code).collect();
+    // let dfi_account_numbers: Vec<String> = entries.iter().map(|x| x.dfi_account_number).collect();
+
+    let items: Vec<Row> = entries
+        .iter()
+        .map(|e| {
+            let cells = vec![
+                Cell::from(Span::raw(format!("{}", e.transaction_code))),
+                Cell::from(Span::raw(format!("{}", e.individual_name))),
+                Cell::from(Span::raw(format!("{}", e.dfi_account_number))),
+                Cell::from(Span::raw(format!("{}", e.trace_number))),
+                Cell::from(Span::raw(format!("{}", e.amount.separate_with_commas()))),
+            ];
+            Row::new(cells)
+        })
+        .collect();
+    let table = Table::new(items)
+        .block(Block::default().title("Colors").borders(Borders::ALL))
+        .widths(&[
+            Constraint::Ratio(1, 6),
+            Constraint::Ratio(1, 6),
+            Constraint::Ratio(1, 6),
+            Constraint::Ratio(1, 6),
+            Constraint::Ratio(1, 6),
+        ]);
+    f.render_widget(table, area);
 }
