@@ -9,14 +9,17 @@ pub struct NachaFile {
     pub file_header: FileHeader,
     pub batches: Vec<Batch>,
     pub file_control: FileControl,
+    raw: String,
 }
 // todo: make all datetimes Option<> because they aren't guaranteed to exist in nacha file
 impl NachaFile {
     pub fn new(content: String) -> NachaFile {
+        let _content = content.clone();
         let mut file = NachaFile {
             file_header: FileHeader::new(),
             batches: Vec::new(),
             file_control: FileControl::new(),
+            raw: _content,
         };
 
         for linestr in content.lines() {
@@ -57,6 +60,16 @@ impl NachaFile {
 
     pub fn last_batch(&mut self) -> &mut Batch {
         return self.batches.last_mut().unwrap();
+    }
+    pub fn as_json(&self) -> String {
+        serde_json::to_string_pretty(self).unwrap()
+    }
+    pub fn as_yaml(&self) -> String {
+        serde_yaml::to_string(self).unwrap()
+    }
+
+    pub fn get_raw(&self) -> String {
+        return self.raw.clone();
     }
 }
 
@@ -228,6 +241,13 @@ impl DetailEntry {
     pub fn add_addenda(&mut self, line: String) {
         let new_addendum = Addendum::parse(line);
         self.addenda.push(new_addendum);
+    }
+
+    pub fn as_json(&self) -> String {
+        serde_json::to_string_pretty(self).unwrap()
+    }
+    pub fn as_yaml(&self) -> String {
+        serde_yaml::to_string(self).unwrap()
     }
 }
 

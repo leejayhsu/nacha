@@ -46,8 +46,6 @@ impl Cli {
                 None => {}
                 _ => {}
             }
-        } else {
-            println!("{}", as_json);
         }
     }
 }
