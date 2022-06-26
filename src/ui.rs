@@ -45,8 +45,11 @@ where
                     .add_modifier(Modifier::BOLD),
             ),
             Span::from(format!(
-                "{:#?}",
-                app.nacha_file.file_header.file_creation_date
+                "{}",
+                match app.nacha_file.file_header.file_creation_date {
+                    Some(d) => d.to_string(),
+                    None => "no date provided".to_string(),
+                }
             )),
         ]),
         Spans::from(vec![
@@ -57,8 +60,11 @@ where
                     .add_modifier(Modifier::BOLD),
             ),
             Span::from(format!(
-                "{:#?}",
-                app.nacha_file.file_header.file_creation_time
+                "{}",
+                match app.nacha_file.file_header.file_creation_time {
+                    Some(t) => format!("{}", t.format("%H:%M")),
+                    None => "no time provided".to_string(),
+                }
             )),
         ]),
         Spans::from(vec![
