@@ -177,7 +177,39 @@ where
     B: Backend,
 {
     let entries = app.nacha_file.get_entries();
-
+    let header_cells = vec![
+        Cell::from(Span::styled(
+            format!("{}", "TXN Code"),
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", "Individual Name"),
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", "DFI Acct Num"),
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", "Trace Num"),
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        )),
+        Cell::from(Span::styled(
+            format!("{:>13}", "Amount"),
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        )),
+    ];
+    let mut header = vec![Row::new(header_cells)];
     let items: Vec<Row> = entries
         .iter()
         .map(|e| {
@@ -194,12 +226,23 @@ where
             Row::new(cells)
         })
         .collect();
-    let table = Table::new(items)
-        .block(Block::default().title("Entries").borders(Borders::ALL))
+    header.extend(items);
+
+    let table = Table::new(header)
+        .block(
+            Block::default()
+                .title(Span::styled(
+                    "File Contents",
+                    Style::default()
+                        .fg(Color::Magenta)
+                        .add_modifier(Modifier::BOLD),
+                ))
+                .borders(Borders::ALL),
+        )
         .widths(&[
-            Constraint::Ratio(5, 100),
+            Constraint::Ratio(6, 100),
             Constraint::Ratio(20, 100),
-            Constraint::Ratio(10, 100),
+            Constraint::Ratio(12, 100),
             Constraint::Ratio(15, 100),
             Constraint::Ratio(15, 100),
         ]);
