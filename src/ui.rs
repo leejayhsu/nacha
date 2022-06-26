@@ -138,8 +138,12 @@ where
                     .add_modifier(Modifier::BOLD),
             ),
             Span::from(format!(
-                "{}",
-                (app.nacha_file.file_control.total_debit as f32 / 100.0).separate_with_commas(),
+                "{:>16}",
+                format!(
+                    "{:.2}",
+                    app.nacha_file.file_control.total_debit as f32 / 100.0
+                )
+                .separate_with_commas(),
             )),
         ]),
         Spans::from(vec![
@@ -150,8 +154,12 @@ where
                     .add_modifier(Modifier::BOLD),
             ),
             Span::from(format!(
-                "{}",
-                (app.nacha_file.file_control.total_credit as f32 / 100.0).separate_with_commas(),
+                "{:>16}",
+                format!(
+                    "{:.2}",
+                    app.nacha_file.file_control.total_credit as f32 / 100.0
+                )
+                .separate_with_commas(),
             )),
         ]),
     ];
@@ -169,25 +177,7 @@ fn draw_file_contents<B>(f: &mut Frame<B>, area: Rect, app: &mut App)
 where
     B: Backend,
 {
-    // let text = vec![Spans::from(
-    //     app.nacha_file.batches[0].detail_entries[0].as_json(),
-    // )];
-
-    (1..10).filter(|x| x % 2 == 0).collect::<Vec<u32>>();
-
-    // let mut entries: Vec<DetailEntry> = Vec::new();
-    // // let slice = &app.nacha_file.batches[..];
-    // for batch in std::iter::IntoIterator::into_iter(app.nacha_file.batches) {
-    //     for entry in batch.detail_entries {
-    //         entries.push(entry);
-    //     }
-    // }
     let entries = app.nacha_file.get_entries();
-    // let amounts: Vec<i32> = entries.iter().map(|x| x.amount).collect();
-    // let names: Vec<String> = entries.iter().map(|x| x.individual_name).collect();
-    // let trace_numbers: Vec<String> = entries.iter().map(|x| x.trace_number).collect();
-    // let transaction_codes: Vec<String> = entries.iter().map(|x| x.transaction_code).collect();
-    // let dfi_account_numbers: Vec<String> = entries.iter().map(|x| x.dfi_account_number).collect();
 
     let items: Vec<Row> = entries
         .iter()
@@ -197,19 +187,22 @@ where
                 Cell::from(Span::raw(format!("{}", e.individual_name))),
                 Cell::from(Span::raw(format!("{}", e.dfi_account_number))),
                 Cell::from(Span::raw(format!("{}", e.trace_number))),
-                Cell::from(Span::raw(format!("{}", e.amount.separate_with_commas()))),
+                Cell::from(Span::raw(format!(
+                    "{:>13}",
+                    format!("{:.2}", e.amount as f32 / 100.00).separate_with_commas()
+                ))),
             ];
             Row::new(cells)
         })
         .collect();
     let table = Table::new(items)
-        .block(Block::default().title("Colors").borders(Borders::ALL))
+        .block(Block::default().title("Entries").borders(Borders::ALL))
         .widths(&[
-            Constraint::Ratio(1, 6),
-            Constraint::Ratio(1, 6),
-            Constraint::Ratio(1, 6),
-            Constraint::Ratio(1, 6),
-            Constraint::Ratio(1, 6),
+            Constraint::Ratio(5, 100),
+            Constraint::Ratio(20, 100),
+            Constraint::Ratio(10, 100),
+            Constraint::Ratio(15, 100),
+            Constraint::Ratio(15, 100),
         ]);
     f.render_widget(table, area);
 }

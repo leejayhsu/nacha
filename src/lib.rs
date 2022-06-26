@@ -221,7 +221,7 @@ pub struct DetailEntry {
     pub receiving_dfi_id: String,
     pub check_digit: String,
     pub dfi_account_number: String,
-    pub amount: i32,
+    pub amount: u32,
     pub individual_id_number: String,
     pub individual_name: String,
     pub discretionary_data: String,
@@ -287,12 +287,12 @@ impl Addendum {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FileControl {
     pub record_type_code: String,
-    pub batch_count: i32,
-    pub block_count: i32,
-    pub entry_and_addenda_count: i32,
+    pub batch_count: u32,
+    pub block_count: u32,
+    pub entry_and_addenda_count: u32,
     pub entry_hash: String,
-    pub total_debit: i32,
-    pub total_credit: i32,
+    pub total_debit: u32,
+    pub total_credit: u32,
     pub reserved: String,
 }
 
