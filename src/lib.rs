@@ -2,9 +2,19 @@
 use chrono::{DateTime, NaiveDate, NaiveTime, ParseError, Utc};
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
+use thousands::Separable;
+
+pub trait Currency {
+    fn pretty_dollars_cents(&self) -> String;
+}
+
+impl Currency for u32 {
+    fn pretty_dollars_cents(&self) -> String {
+        return format!("{:.2}", *self as f32 / 100.0).separate_with_commas();
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
-
 pub struct NachaFile {
     pub file_header: FileHeader,
     pub batches: Vec<Batch>,

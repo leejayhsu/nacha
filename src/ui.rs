@@ -1,4 +1,5 @@
 use crate::app::App;
+use crate::lib::Currency;
 use crate::lib::DetailEntry;
 use thousands::Separable;
 use tui::{
@@ -139,11 +140,10 @@ where
             ),
             Span::from(format!(
                 "{:>16}",
-                format!(
-                    "{:.2}",
-                    app.nacha_file.file_control.total_debit as f32 / 100.0
-                )
-                .separate_with_commas(),
+                app.nacha_file
+                    .file_control
+                    .total_debit
+                    .pretty_dollars_cents(),
             )),
         ]),
         Spans::from(vec![
@@ -155,11 +155,10 @@ where
             ),
             Span::from(format!(
                 "{:>16}",
-                format!(
-                    "{:.2}",
-                    app.nacha_file.file_control.total_credit as f32 / 100.0
-                )
-                .separate_with_commas(),
+                app.nacha_file
+                    .file_control
+                    .total_credit
+                    .pretty_dollars_cents()
             )),
         ]),
     ];
@@ -189,7 +188,7 @@ where
                 Cell::from(Span::raw(format!("{}", e.trace_number))),
                 Cell::from(Span::raw(format!(
                     "{:>13}",
-                    format!("{:.2}", e.amount as f32 / 100.00).separate_with_commas()
+                    e.amount.pretty_dollars_cents()
                 ))),
             ];
             Row::new(cells)
