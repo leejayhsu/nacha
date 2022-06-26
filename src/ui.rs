@@ -138,13 +138,16 @@ where
                     .fg(Color::Cyan)
                     .add_modifier(Modifier::BOLD),
             ),
-            Span::from(format!(
-                "{:>16}",
-                app.nacha_file
-                    .file_control
-                    .total_debit
-                    .pretty_dollars_cents(),
-            )),
+            Span::styled(
+                format!(
+                    "{:>16}",
+                    app.nacha_file
+                        .file_control
+                        .total_debit
+                        .pretty_dollars_cents(),
+                ),
+                Style::default().fg(Color::Red),
+            ),
         ]),
         Spans::from(vec![
             Span::styled(
@@ -153,13 +156,16 @@ where
                     .fg(Color::Cyan)
                     .add_modifier(Modifier::BOLD),
             ),
-            Span::from(format!(
-                "{:>16}",
-                app.nacha_file
-                    .file_control
-                    .total_credit
-                    .pretty_dollars_cents()
-            )),
+            Span::styled(
+                format!(
+                    "{:>16}",
+                    app.nacha_file
+                        .file_control
+                        .total_credit
+                        .pretty_dollars_cents()
+                ),
+                Style::default().fg(Color::Green),
+            ),
         ]),
     ];
     let block = Block::default().borders(Borders::ALL).title(Span::styled(
@@ -213,15 +219,33 @@ where
     let items: Vec<Row> = entries
         .iter()
         .map(|e| {
+            let code = &e.transaction_code[..];
+            let color = match code {
+                "22" | "32" | "42" | "52" => Color::Green,
+                "27" | "37" | "47" => Color::Red,
+                _ => Color::Reset,
+            };
             let cells = vec![
-                Cell::from(Span::raw(format!("{}", e.transaction_code))),
-                Cell::from(Span::raw(format!("{}", e.individual_name))),
-                Cell::from(Span::raw(format!("{}", e.dfi_account_number))),
-                Cell::from(Span::raw(format!("{}", e.trace_number))),
-                Cell::from(Span::raw(format!(
-                    "{:>13}",
-                    e.amount.pretty_dollars_cents()
-                ))),
+                Cell::from(Span::styled(
+                    format!("{}", e.transaction_code),
+                    Style::default().fg(color),
+                )),
+                Cell::from(Span::styled(
+                    format!("{}", e.individual_name),
+                    Style::default().fg(Color::Reset),
+                )),
+                Cell::from(Span::styled(
+                    format!("{}", e.dfi_account_number),
+                    Style::default().fg(Color::Reset),
+                )),
+                Cell::from(Span::styled(
+                    format!("{}", e.trace_number),
+                    Style::default().fg(Color::Reset),
+                )),
+                Cell::from(Span::styled(
+                    format!("{:>13}", e.amount.pretty_dollars_cents()),
+                    Style::default().fg(color),
+                )),
             ];
             Row::new(cells)
         })
