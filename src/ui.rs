@@ -16,10 +16,45 @@ use tui::{
 
 pub fn draw<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let chunks = Layout::default()
-        .constraints([Constraint::Length(7), Constraint::Min(2)].as_ref())
+        .constraints(
+            [
+                Constraint::Length(7),
+                Constraint::Min(2),
+                Constraint::Length(3),
+            ]
+            .as_ref(),
+        )
         .split(f.size());
     draw_file_metadata(f, chunks[0], app);
-    draw_file_contents(f, chunks[1], app)
+    draw_file_contents(f, chunks[1], app);
+    draw_shortcut_help(f, chunks[2]);
+}
+
+fn draw_shortcut_help<B>(f: &mut Frame<B>, area: Rect)
+where
+    B: Backend,
+{
+    let text = vec![Spans::from(vec![
+        Span::styled("j / <down>", Style::default().fg(Color::Cyan)),
+        Span::from(" : next"),
+        Span::raw("  "),
+        Span::styled("k / <up>", Style::default().fg(Color::Cyan)),
+        Span::raw(" : previous"),
+        Span::raw("  "),
+        Span::styled("l / <right>", Style::default().fg(Color::Cyan)),
+        Span::raw(" : jump next"),
+        Span::raw("  "),
+        Span::styled("h / <left>", Style::default().fg(Color::Cyan)),
+        Span::raw(" : jump previous"),
+    ])];
+    let block = Block::default().borders(Borders::ALL).title(Span::styled(
+        "Keyboard Shortcuts",
+        Style::default()
+            .fg(Color::Magenta)
+            .add_modifier(Modifier::BOLD),
+    ));
+    let paragraph = Paragraph::new(text).block(block).wrap(Wrap { trim: true });
+    f.render_widget(paragraph, area);
 }
 
 fn draw_file_metadata<B>(f: &mut Frame<B>, area: Rect, app: &mut App)
