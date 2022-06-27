@@ -15,7 +15,7 @@ To parse a nacha file, just provide the filename!
 ```sh
 nacha my_nacha_file.ach
 ```
-
+![GIF showing tui usage](https://raw.githubusercontent.com/leejayhsu/nacha/main/examples/demo.gif)
 ### Examples
 Given a nacha file `my_nacha.ach` like below:
 ```
