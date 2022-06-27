@@ -61,10 +61,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let content = std::fs::read_to_string(&cli.path)
         .with_context(|| format!("could not read file `{}`", &cli.path.display()))?;
 
-    let nacha_file = lib::NachaFile::new(content);
+    let mut nacha_file = lib::NachaFile::new(content);
 
     cli.output(&nacha_file);
     let tick_rate = Duration::from_millis(1000);
-    run(tick_rate, nacha_file)?;
+    run(tick_rate, &mut nacha_file)?;
     Ok(())
 }

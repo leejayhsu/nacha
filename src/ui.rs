@@ -9,10 +9,7 @@ use tui::{
     symbols,
     text::{Span, Spans},
     widgets::canvas::{Canvas, Line, Map, MapResolution, Rectangle},
-    widgets::{
-        Axis, BarChart, Block, Borders, Cell, Chart, Dataset, Gauge, LineGauge, List, ListItem,
-        Paragraph, Row, Sparkline, Table, Tabs, Wrap,
-    },
+    widgets::{Block, Borders, Cell, Paragraph, Row, Table, Wrap},
     Frame,
 };
 
@@ -188,41 +185,43 @@ fn draw_file_contents<B>(f: &mut Frame<B>, area: Rect, app: &mut App)
 where
     B: Backend,
 {
-    let entries = app.nacha_file.get_entries();
-    let header_cells = vec![
-        Cell::from(Span::styled(
-            format!("{}", "TXN Code"),
-            Style::default()
-                .add_modifier(Modifier::BOLD)
-                .fg(Color::Cyan),
-        )),
-        Cell::from(Span::styled(
-            format!("{}", "Individual Name"),
-            Style::default()
-                .add_modifier(Modifier::BOLD)
-                .fg(Color::Cyan),
-        )),
-        Cell::from(Span::styled(
-            format!("{}", "DFI Acct Num"),
-            Style::default()
-                .add_modifier(Modifier::BOLD)
-                .fg(Color::Cyan),
-        )),
-        Cell::from(Span::styled(
-            format!("{}", "Trace Num"),
-            Style::default()
-                .add_modifier(Modifier::BOLD)
-                .fg(Color::Cyan),
-        )),
-        Cell::from(Span::styled(
-            format!("{:>13}", "Amount"),
-            Style::default()
-                .add_modifier(Modifier::BOLD)
-                .fg(Color::Cyan),
-        )),
-    ];
-    let mut header = vec![Row::new(header_cells)];
-    let items: Vec<Row> = entries
+    let entries = &app.entries;
+    // let header_cells = vec![
+    //     Cell::from(Span::styled(
+    //         format!("{}", "TXN Code"),
+    //         Style::default()
+    //             .add_modifier(Modifier::BOLD)
+    //             .fg(Color::Cyan),
+    //     )),
+    //     Cell::from(Span::styled(
+    //         format!("{}", "Individual Name"),
+    //         Style::default()
+    //             .add_modifier(Modifier::BOLD)
+    //             .fg(Color::Cyan),
+    //     )),
+    //     Cell::from(Span::styled(
+    //         format!("{}", "DFI Acct Num"),
+    //         Style::default()
+    //             .add_modifier(Modifier::BOLD)
+    //             .fg(Color::Cyan),
+    //     )),
+    //     Cell::from(Span::styled(
+    //         format!("{}", "Trace Num"),
+    //         Style::default()
+    //             .add_modifier(Modifier::BOLD)
+    //             .fg(Color::Cyan),
+    //     )),
+    //     Cell::from(Span::styled(
+    //         format!("{:>13}", "Amount"),
+    //         Style::default()
+    //             .add_modifier(Modifier::BOLD)
+    //             .fg(Color::Cyan),
+    //     )),
+    // ];
+    // let mut table_stuff = vec![Row::new(header_cells)];
+    let items: Vec<Row> = app
+        .entries
+        .items
         .iter()
         .map(|e| {
             let code = &e.transaction_code[..];
@@ -256,9 +255,9 @@ where
             Row::new(cells)
         })
         .collect();
-    header.extend(items);
+    // table_stuff.extend(items);
 
-    let table = Table::new(header)
+    let table = Table::new(items)
         .block(
             Block::default()
                 .title(Span::styled(
@@ -269,6 +268,8 @@ where
                 ))
                 .borders(Borders::ALL),
         )
+        .highlight_style(Style::default().add_modifier(Modifier::BOLD))
+        .highlight_symbol("> ")
         .widths(&[
             Constraint::Ratio(6, 100),
             Constraint::Ratio(20, 100),
@@ -276,5 +277,5 @@ where
             Constraint::Ratio(15, 100),
             Constraint::Ratio(15, 100),
         ]);
-    f.render_widget(table, area);
+    f.render_stateful_widget(table, area, &mut app.entries.state);
 }

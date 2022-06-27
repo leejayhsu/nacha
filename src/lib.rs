@@ -14,7 +14,7 @@ impl Currency for u32 {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct NachaFile {
     pub file_header: FileHeader,
     pub batches: Vec<Batch>,
@@ -94,7 +94,7 @@ impl NachaFile {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FileHeader {
     pub record_type_code: String,
     pub priority_code: String,
@@ -157,7 +157,7 @@ impl FileHeader {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Batch {
     pub batch_header: BatchHeader,
     pub detail_entries: Vec<DetailEntry>,
@@ -175,7 +175,7 @@ impl Batch {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct BatchHeader {
     pub record_type_code: String,
     pub service_class_code: String,
@@ -224,7 +224,7 @@ impl BatchHeader {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DetailEntry {
     pub record_type_code: String,
     pub transaction_code: String,
@@ -272,7 +272,7 @@ impl DetailEntry {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Addendum {
     record_type_code: String,
     addenda_type_code: String,
@@ -294,7 +294,7 @@ impl Addendum {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FileControl {
     pub record_type_code: String,
     pub batch_count: u32,

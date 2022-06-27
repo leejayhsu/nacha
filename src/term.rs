@@ -1,6 +1,9 @@
 #![allow(unused)]
 use crate::ui;
-use crate::{app::App, lib::NachaFile};
+use crate::{
+    app::App,
+    lib::{DetailEntry, NachaFile},
+};
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
@@ -15,8 +18,17 @@ use tui::{
     backend::{Backend, CrosstermBackend},
     Terminal,
 };
-
-pub fn run(tick_rate: Duration, nacha_file: NachaFile) -> Result<(), Box<dyn Error>> {
+fn get_entries(nacha_file: &NachaFile) -> Vec<DetailEntry> {
+    let mut entries = Vec::new();
+    // let batches = self.batches.iter();
+    for batch in &nacha_file.batches {
+        for entry in &batch.detail_entries {
+            entries.push(entry.clone());
+        }
+    }
+    return entries;
+}
+pub fn run(tick_rate: Duration, nacha_file: &mut NachaFile) -> Result<(), Box<dyn Error>> {
     // setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -25,7 +37,8 @@ pub fn run(tick_rate: Duration, nacha_file: NachaFile) -> Result<(), Box<dyn Err
     let mut terminal = Terminal::new(backend)?;
 
     // run the terminal
-    let app = App::new(nacha_file);
+
+    let app = App::new(nacha_file, get_entries(nacha_file));
     let res = run_app(&mut terminal, app, tick_rate);
 
     // restore terminal
@@ -61,9 +74,9 @@ fn run_app<B: Backend>(
                 match key.code {
                     KeyCode::Char(c) => app.on_key(c),
                     // KeyCode::Left => app.on_left(),
-                    // KeyCode::Up => app.on_up(),
+                    KeyCode::Up => app.on_up(),
                     // KeyCode::Right => app.on_right(),
-                    // KeyCode::Down => app.on_down(),
+                    KeyCode::Down => app.on_down(),
                     _ => {}
                 }
             }
