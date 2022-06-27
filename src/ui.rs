@@ -46,6 +46,9 @@ where
         Span::raw("  "),
         Span::styled("h / <left>", Style::default().fg(Color::Cyan)),
         Span::raw(" : jump previous"),
+        Span::raw("  "),
+        Span::styled("q", Style::default().fg(Color::Red)),
+        Span::raw(" : quit"),
     ])];
     let block = Block::default().borders(Borders::ALL).title(Span::styled(
         "Keyboard Shortcuts",
