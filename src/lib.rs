@@ -21,7 +21,7 @@ pub struct NachaFile {
     pub file_control: FileControl,
     raw: String,
 }
-// todo: make all datetimes Option<> because they aren't guaranteed to exist in nacha file
+
 impl NachaFile {
     pub fn new(content: String) -> NachaFile {
         let _content = content.clone();

@@ -1,6 +1,7 @@
 use crate::app::App;
 use crate::lib::Currency;
 use crate::lib::DetailEntry;
+use crate::term::DetailEntryWithCounter;
 use thousands::Separable;
 use tui::{
     backend::Backend,
@@ -186,45 +187,52 @@ where
     B: Backend,
 {
     let entries = &app.entries;
-    // let header_cells = vec![
-    //     Cell::from(Span::styled(
-    //         format!("{}", "TXN Code"),
-    //         Style::default()
-    //             .add_modifier(Modifier::BOLD)
-    //             .fg(Color::Cyan),
-    //     )),
-    //     Cell::from(Span::styled(
-    //         format!("{}", "Individual Name"),
-    //         Style::default()
-    //             .add_modifier(Modifier::BOLD)
-    //             .fg(Color::Cyan),
-    //     )),
-    //     Cell::from(Span::styled(
-    //         format!("{}", "DFI Acct Num"),
-    //         Style::default()
-    //             .add_modifier(Modifier::BOLD)
-    //             .fg(Color::Cyan),
-    //     )),
-    //     Cell::from(Span::styled(
-    //         format!("{}", "Trace Num"),
-    //         Style::default()
-    //             .add_modifier(Modifier::BOLD)
-    //             .fg(Color::Cyan),
-    //     )),
-    //     Cell::from(Span::styled(
-    //         format!("{:>13}", "Amount"),
-    //         Style::default()
-    //             .add_modifier(Modifier::BOLD)
-    //             .fg(Color::Cyan),
-    //     )),
-    // ];
-    // let mut table_stuff = vec![Row::new(header_cells)];
+    let header_cells = vec![
+        Cell::from(Span::styled(
+            format!("{}", "Entry #"),
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", "TXN Code"),
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", "Individual Name"),
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", "DFI Acct #"),
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", "Trace #"),
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        )),
+        Cell::from(Span::styled(
+            format!("{:>13}", "Amount"),
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        )),
+    ];
+    let header = Row::new(header_cells);
+
     let items: Vec<Row> = app
         .entries
         .items
         .iter()
         .map(|e| {
-            let code = &e.transaction_code[..];
+            let code = &e.entry.transaction_code[..];
             let color = match code {
                 "22" | "32" | "42" | "52" => Color::Green,
                 "27" | "37" | "47" => Color::Red,
@@ -232,23 +240,27 @@ where
             };
             let cells = vec![
                 Cell::from(Span::styled(
-                    format!("{}", e.transaction_code),
+                    format!("{}", e.counter),
+                    Style::default().fg(Color::Reset),
+                )),
+                Cell::from(Span::styled(
+                    format!("{}", e.entry.transaction_code),
                     Style::default().fg(color),
                 )),
                 Cell::from(Span::styled(
-                    format!("{}", e.individual_name),
+                    format!("{}", e.entry.individual_name),
                     Style::default().fg(Color::Reset),
                 )),
                 Cell::from(Span::styled(
-                    format!("{}", e.dfi_account_number),
+                    format!("{}", e.entry.dfi_account_number),
                     Style::default().fg(Color::Reset),
                 )),
                 Cell::from(Span::styled(
-                    format!("{}", e.trace_number),
+                    format!("{}", e.entry.trace_number),
                     Style::default().fg(Color::Reset),
                 )),
                 Cell::from(Span::styled(
-                    format!("{:>13}", e.amount.pretty_dollars_cents()),
+                    format!("{:>13}", e.entry.amount.pretty_dollars_cents()),
                     Style::default().fg(color),
                 )),
             ];
@@ -270,7 +282,9 @@ where
         )
         .highlight_style(Style::default().add_modifier(Modifier::BOLD))
         .highlight_symbol("> ")
+        .header(header)
         .widths(&[
+            Constraint::Ratio(6, 100),
             Constraint::Ratio(6, 100),
             Constraint::Ratio(20, 100),
             Constraint::Ratio(12, 100),

@@ -18,12 +18,24 @@ use tui::{
     backend::{Backend, CrosstermBackend},
     Terminal,
 };
-fn get_entries(nacha_file: &NachaFile) -> Vec<DetailEntry> {
+
+pub struct DetailEntryWithCounter {
+    pub entry: DetailEntry,
+    pub counter: u32,
+}
+
+impl DetailEntryWithCounter {
+    pub fn new(entry: DetailEntry, counter: u32) -> DetailEntryWithCounter {
+        DetailEntryWithCounter { entry, counter }
+    }
+}
+fn get_entries(nacha_file: &NachaFile) -> Vec<DetailEntryWithCounter> {
     let mut entries = Vec::new();
-    // let batches = self.batches.iter();
+    let mut count: u32 = 1;
     for batch in &nacha_file.batches {
         for entry in &batch.detail_entries {
-            entries.push(entry.clone());
+            entries.push(DetailEntryWithCounter::new(entry.clone(), count));
+            count += 1;
         }
     }
     return entries;
@@ -37,7 +49,6 @@ pub fn run(tick_rate: Duration, nacha_file: &mut NachaFile) -> Result<(), Box<dy
     let mut terminal = Terminal::new(backend)?;
 
     // run the terminal
-
     let app = App::new(nacha_file, get_entries(nacha_file));
     let res = run_app(&mut terminal, app, tick_rate);
 
@@ -73,16 +84,15 @@ fn run_app<B: Backend>(
             if let Event::Key(key) = event::read()? {
                 match key.code {
                     KeyCode::Char(c) => app.on_key(c),
-                    // KeyCode::Left => app.on_left(),
+                    KeyCode::Left => app.on_left(),
                     KeyCode::Up => app.on_up(),
-                    // KeyCode::Right => app.on_right(),
+                    KeyCode::Right => app.on_right(),
                     KeyCode::Down => app.on_down(),
                     _ => {}
                 }
             }
         }
         if last_tick.elapsed() >= tick_rate {
-            // app.on_tick();
             last_tick = Instant::now();
         }
         if app.should_quit {
