@@ -1,12 +1,13 @@
-### Library Usage
-```rust
-let content = std::fs::read_to_string("my_nacha_file.ach").unwrap()
-let file = NachaFile::new(content)
+<br />
 
-println!("{:#?}", file);
-```
+<div align="center">
+    <h1>nacha</h1>
+    <p><h3 align="center">A terminal tool for exploring and parsing NACHA files</h3></p>
+</div>
 
-### CLI Usage
+<hr>
+
+### Usage
 ```sh
 cargo install nacha
 ```
@@ -29,7 +30,11 @@ Given a nacha file `my_nacha.ach` like below:
 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
 ```
-#### json
+#### Explore file in terminal
+```sh
+nacha my_nacha.ach
+```
+#### Export as json
 ```sh
 nacha my_nacha.ach my_nacha.json
 ```
@@ -97,7 +102,7 @@ nacha my_nacha.ach my_nacha.json
   }
 }
 ```
-#### yaml
+#### Export as yaml
 ```sh
 nacha my_nacha.ach my_nacha.yaml
 ```
