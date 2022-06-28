@@ -19,6 +19,7 @@ pub struct NachaFile {
     pub file_header: FileHeader,
     pub batches: Vec<Batch>,
     pub file_control: FileControl,
+    #[serde(skip_serializing)]
     raw: String,
 }
 
@@ -45,6 +46,7 @@ impl NachaFile {
                     let batch = Batch {
                         batch_header: BatchHeader::parse(line),
                         detail_entries: Vec::new(),
+                        batch_control: BatchControl::new(),
                     };
                     file.batches.push(batch);
                 }
@@ -55,6 +57,10 @@ impl NachaFile {
                 "7" => {
                     debug!("addendum entry found");
                     file.last_batch().last_entry().add_addenda(line);
+                }
+                "8" => {
+                    debug!("batch control found");
+                    file.last_batch().batch_control.parse(line);
                 }
                 "9" => {
                     debug!("file control found");
@@ -161,7 +167,7 @@ impl FileHeader {
 pub struct Batch {
     pub batch_header: BatchHeader,
     pub detail_entries: Vec<DetailEntry>,
-    // batch_control: BatchControl,
+    batch_control: BatchControl,
 }
 
 impl Batch {
@@ -221,6 +227,52 @@ impl BatchHeader {
             batch_number: line[87..94].trim().to_string(),
         };
         return bh;
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct BatchControl {
+    pub record_type_code: String,
+    pub service_class_code: String,
+    pub entry_addenda_count: String,
+    pub entry_hash: String,
+    pub total_debit: u32,
+    pub total_credit: u32,
+    pub company_id: String,
+    pub message_authentication_code: String,
+    pub reserved: String,
+    pub originating_dfi_id: String,
+    pub batch_number: String,
+}
+
+impl BatchControl {
+    pub fn new() -> BatchControl {
+        BatchControl {
+            record_type_code: "".to_string(),
+            service_class_code: "".to_string(),
+            entry_addenda_count: "".to_string(),
+            entry_hash: "".to_string(),
+            total_debit: 0,
+            total_credit: 0,
+            company_id: "".to_string(),
+            message_authentication_code: "".to_string(),
+            reserved: "".to_string(),
+            originating_dfi_id: "".to_string(),
+            batch_number: "".to_string(),
+        }
+    }
+    pub fn parse(&mut self, line: String) {
+        self.record_type_code = line[0..1].trim().to_string();
+        self.service_class_code = line[1..4].trim().to_string();
+        self.entry_addenda_count = line[4..10].trim().to_string();
+        self.entry_hash = line[10..20].trim().to_string();
+        self.total_debit = line[20..32].trim().parse().unwrap();
+        self.total_credit = line[32..43].trim().parse().unwrap();
+        self.company_id = line[43..54].trim().to_string();
+        self.message_authentication_code = line[54..73].trim().to_string();
+        self.reserved = line[73..79].trim().to_string();
+        self.originating_dfi_id = line[79..87].trim().to_string();
+        self.batch_number = line[87..94].trim().to_string();
     }
 }
 

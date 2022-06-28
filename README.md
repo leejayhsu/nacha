@@ -87,7 +87,20 @@ nacha my_nacha.ach my_nacha.json
           "trace_number": "121042880000001",
           "addenda": []
         }
-      ]
+      ],
+      "batch_control": {
+        "record_type_code": "8",
+        "service_class_code": "225",
+        "entry_addenda_count": "000001",
+        "entry_hash": "0023138010",
+        "total_debit": 100000000,
+        "total_credit": 0,
+        "company_id": "0121042882",
+        "message_authentication_code": "",
+        "reserved": "",
+        "originating_dfi_id": "12104288",
+        "batch_number": "0000001"
+      }
     }
   ],
   "file_control": {
@@ -150,6 +163,18 @@ batches:
         addenda_record_indicator: "0"
         trace_number: "121042880000001"
         addenda: []
+    batch_control:
+      record_type_code: "8"
+      service_class_code: "225"
+      entry_addenda_count: "000001"
+      entry_hash: "0023138010"
+      total_debit: 100000000
+      total_credit: 0
+      company_id: "0121042882"
+      message_authentication_code: ""
+      reserved: ""
+      originating_dfi_id: "12104288"
+      batch_number: "0000001"
 file_control:
   record_type_code: "9"
   batch_count: 1
@@ -159,4 +184,5 @@ file_control:
   total_debit: 100000000
   total_credit: 0
   reserved: ""
+
 ```
