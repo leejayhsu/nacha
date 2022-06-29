@@ -121,13 +121,19 @@ impl<T> StatefulTable<T> {
     }
 
     pub fn add_items(&mut self, items: Vec<T>) {
-        let jump_size = items.len() / 10;
+        let mut jump_size = items.len() / 10;
+        if jump_size == 0 {
+            jump_size = 1;
+        }
         self.items = items;
         self.jump_size = jump_size;
     }
 
     pub fn with_items(items: Vec<T>) -> StatefulTable<T> {
-        let jump_size = items.len() / 10;
+        let mut jump_size = items.len() / 10;
+        if jump_size == 0 {
+            jump_size = 1;
+        }
         StatefulTable {
             state: TableState::default(),
             items,

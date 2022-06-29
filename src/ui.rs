@@ -369,12 +369,12 @@ fn parse_entry_into_cells(e: &DetailEntryWithCounter) -> Vec<Cell<'static>> {
             format!(
                 "{:^8}",
                 match e.entry.addenda.len().cmp(&0) {
-                    Ordering::Less => "",
-                    Ordering::Equal => "",
-                    Ordering::Greater => "✅",
+                    Ordering::Less => "".to_string(),
+                    Ordering::Equal => "".to_string(),
+                    Ordering::Greater => e.entry.addenda.len().to_string(),
                 }
             ),
-            Style::default().fg(color),
+            Style::default().fg(Color::Reset),
         )),
     ];
     return cells;
