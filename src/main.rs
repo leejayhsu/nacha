@@ -1,11 +1,9 @@
-#![allow(unused)]
-
 use crate::term::run;
 use anyhow::{Context, Result};
 use clap::Parser;
 use env_logger::Env;
-use std::{error::Error, time::Duration};
-use std::{ffi::OsStr, fs::File, io::Write, path::PathBuf};
+use std::time::Duration;
+use std::{ffi::OsStr, fs::File, io::Write};
 mod app;
 mod lib;
 mod term;
@@ -25,23 +23,20 @@ struct Cli {
 
 impl Cli {
     fn output(self, data: &lib::NachaFile) {
-        let as_json = serde_json::to_string_pretty(data).unwrap();
-        let as_yaml = serde_yaml::to_string(data).unwrap();
-
         if let Some(output_path) = self.output {
             let ext = output_path.extension().and_then(OsStr::to_str);
             match ext {
                 Some("json") => {
                     let mut output_file = File::create(output_path).unwrap();
-                    write!(output_file, "{}", as_json);
+                    write!(output_file, "{}", data.as_json()).expect("could not write json file");
                 }
                 Some("yaml") => {
                     let mut output_file = File::create(output_path).unwrap();
-                    write!(output_file, "{}", as_yaml);
+                    write!(output_file, "{}", data.as_yaml()).expect("could not write yaml file");
                 }
                 Some("yml") => {
                     let mut output_file = File::create(output_path).unwrap();
-                    write!(output_file, "{}", as_yaml);
+                    write!(output_file, "{}", data.as_yaml()).expect("could not write yaml file");
                 }
                 None => {}
                 _ => {}

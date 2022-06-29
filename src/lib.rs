@@ -1,5 +1,4 @@
-#![allow(unused)]
-use chrono::{DateTime, NaiveDate, NaiveTime, ParseError, Utc};
+use chrono::{NaiveDate, NaiveTime};
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
 use thousands::Separable;
@@ -20,6 +19,7 @@ pub struct NachaFile {
     pub batches: Vec<Batch>,
     pub file_control: FileControl,
     #[serde(skip_serializing)]
+    #[allow(dead_code)]
     raw: String,
 }
 
@@ -83,21 +83,6 @@ impl NachaFile {
     pub fn as_yaml(&self) -> String {
         serde_yaml::to_string(self).unwrap()
     }
-
-    pub fn get_raw(&self) -> String {
-        return self.raw.clone();
-    }
-
-    pub fn get_entries(&mut self) -> Vec<&DetailEntry> {
-        let mut entries = Vec::new();
-        // let batches = self.batches.iter();
-        for batch in &self.batches {
-            for entry in &batch.detail_entries {
-                entries.push(entry);
-            }
-        }
-        return entries;
-    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -139,12 +124,12 @@ impl FileHeader {
         let maybe_date = NaiveDate::parse_from_str(line[23..29].trim(), "%y%m%d");
         let date = match maybe_date {
             Ok(d) => Some(d),
-            Err(e) => None,
+            Err(_) => None,
         };
         let maybe_time = NaiveTime::parse_from_str(line[29..33].trim(), "%H%M");
         let time = match maybe_time {
             Ok(t) => Some(t),
-            Err(e) => None,
+            Err(_) => None,
         };
 
         self.record_type_code = line[0..1].trim().to_string();
@@ -203,12 +188,12 @@ impl BatchHeader {
         let maybe_effective_date = NaiveDate::parse_from_str(line[69..75].trim(), "%y%m%d");
         let edate = match maybe_effective_date {
             Ok(d) => Some(d),
-            Err(e) => None,
+            Err(_) => None,
         };
         let maybe_settlement_date = NaiveDate::parse_from_str(line[75..78].trim(), "%y%m%d");
         let sdate = match maybe_settlement_date {
             Ok(d) => Some(d),
-            Err(e) => None,
+            Err(_) => None,
         };
 
         let bh = BatchHeader {
@@ -316,12 +301,6 @@ impl DetailEntry {
         self.addenda.push(new_addendum);
     }
 
-    pub fn as_json(&self) -> String {
-        serde_json::to_string_pretty(self).unwrap()
-    }
-    pub fn as_yaml(&self) -> String {
-        serde_yaml::to_string(self).unwrap()
-    }
     pub fn has_addenda(&self) -> bool {
         self.addenda.len() > 0
     }

@@ -1,16 +1,12 @@
-use crate::app::{App, StatefulTable};
-use crate::lib::{Addendum, Currency, DetailEntry};
+use crate::app::App;
+use crate::lib::{Addendum, Currency};
 use crate::term::DetailEntryWithCounter;
 use std::cmp::Ordering;
-use thousands::Separable;
-use tui::text::Text;
 use tui::{
     backend::Backend,
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
-    symbols,
     text::{Span, Spans},
-    widgets::canvas::{Canvas, Line, Map, MapResolution, Rectangle},
     widgets::{Block, Borders, Cell, Clear, Paragraph, Row, Table, Wrap},
     Frame,
 };
@@ -228,7 +224,6 @@ fn draw_file_contents<B>(f: &mut Frame<B>, area: Rect, app: &mut App)
 where
     B: Backend,
 {
-    let entries = &app.entries;
     let header_cells = make_header();
     let header = Row::new(header_cells);
 
@@ -268,14 +263,10 @@ where
     f.render_stateful_widget(table, area, &mut app.entries.state);
 
     if app.show_popup {
-        let block = Block::default().title("Popup").borders(Borders::ALL);
         let area = centered_rect(95, 50, f.size());
-        let text = vec![Spans::from(vec![Span::raw(
-            "display stateful table of addenda here",
-        )])];
         // todo: add counter to addenda items
-        let i = match app.entries.state.selected() {
-            Some(i) => {
+        match app.entries.state.selected() {
+            Some(_) => {
                 let addenda_items: Vec<Row> = app
                     .addenda_popup
                     .items

@@ -1,10 +1,6 @@
-use crate::lib::{Addendum, Currency, DetailEntry, NachaFile};
+use crate::lib::{Addendum, NachaFile};
 use crate::term::DetailEntryWithCounter;
-use tui::{
-    style::{Color, Modifier, Style},
-    text::Span,
-    widgets::{Cell, Row, Table, TableState},
-};
+use tui::widgets::TableState;
 pub struct App<'a> {
     pub should_quit: bool,
     pub entries: StatefulTable<DetailEntryWithCounter>,
@@ -60,7 +56,7 @@ impl<'a> App<'a> {
                 }
             }
             'o' => {
-                let i = match self.entries.state.selected() {
+                match self.entries.state.selected() {
                     Some(i) => {
                         if self.entries.items[i].entry.has_addenda() {
                             self.show_popup = !self.show_popup;
