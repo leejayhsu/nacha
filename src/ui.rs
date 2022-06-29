@@ -267,8 +267,12 @@ where
     if app.show_popup {
         let block = Block::default().title("Popup").borders(Borders::ALL);
         let area = centered_rect(60, 20, f.size());
+        let text = vec![Spans::from(vec![Span::raw(
+            "display stateful table of addenda here",
+        )])];
+        let paragraph = Paragraph::new(text).block(block).wrap(Wrap { trim: true });
         f.render_widget(Clear, area); //this clears out the background
-        f.render_widget(block, area);
+        f.render_widget(paragraph, area);
     }
 }
 

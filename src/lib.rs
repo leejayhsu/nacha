@@ -322,6 +322,9 @@ impl DetailEntry {
     pub fn as_yaml(&self) -> String {
         serde_yaml::to_string(self).unwrap()
     }
+    pub fn has_addenda(&self) -> bool {
+        self.addenda.len() > 0
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

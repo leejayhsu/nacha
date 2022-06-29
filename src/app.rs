@@ -42,7 +42,14 @@ impl<'a> App<'a> {
                 self.entries.jump_next();
             }
             'o' => {
-                self.show_popup = !self.show_popup;
+                let i = match self.entries.state.selected() {
+                    Some(i) => {
+                        if self.entries.items[i].entry.has_addenda() {
+                            self.show_popup = !self.show_popup;
+                        }
+                    }
+                    None => {}
+                };
             }
             _ => {}
         }
