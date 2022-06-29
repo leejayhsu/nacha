@@ -2,6 +2,7 @@ use crate::app::App;
 use crate::lib::Currency;
 use crate::lib::DetailEntry;
 use crate::term::DetailEntryWithCounter;
+use std::cmp::Ordering;
 use thousands::Separable;
 use tui::{
     backend::Backend,
@@ -262,6 +263,12 @@ where
                 .add_modifier(Modifier::BOLD)
                 .fg(Color::Cyan),
         )),
+        Cell::from(Span::styled(
+            format!("{}", "Addenda?"),
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        )),
     ];
     let header = Row::new(header_cells);
 
@@ -301,6 +308,17 @@ where
                     format!("{:>13}", e.entry.amount.pretty_dollars_cents()),
                     Style::default().fg(color),
                 )),
+                Cell::from(Span::styled(
+                    format!(
+                        "{:^8}",
+                        match e.entry.addenda.len().cmp(&0) {
+                            Ordering::Less => "",
+                            Ordering::Equal => "",
+                            Ordering::Greater => "✅",
+                        }
+                    ),
+                    Style::default().fg(color),
+                )),
             ];
             Row::new(cells)
         })
@@ -327,7 +345,8 @@ where
             Constraint::Ratio(20, 100),
             Constraint::Ratio(12, 100),
             Constraint::Ratio(15, 100),
-            Constraint::Ratio(15, 100),
+            Constraint::Ratio(10, 100),
+            Constraint::Ratio(6, 100),
         ]);
     f.render_stateful_widget(table, area, &mut app.entries.state);
 }
