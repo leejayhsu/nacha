@@ -104,11 +104,13 @@ pub struct StatefulTable<T> {
 
 impl<T> StatefulTable<T> {
     pub fn new() -> StatefulTable<T> {
-        StatefulTable {
+        let mut s = StatefulTable {
             state: TableState::default(),
             items: Vec::new(),
             jump_size: 1,
-        }
+        };
+        s.state.select(Some(0));
+        return s;
     }
 
     /// used with popup
@@ -134,11 +136,13 @@ impl<T> StatefulTable<T> {
         if jump_size == 0 {
             jump_size = 1;
         }
-        StatefulTable {
+        let mut s = StatefulTable {
             state: TableState::default(),
             items,
             jump_size,
-        }
+        };
+        s.state.select(Some(0));
+        return s;
     }
 
     pub fn next(&mut self) {
