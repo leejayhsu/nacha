@@ -10,6 +10,7 @@ pub struct App<'a> {
     pub entries: StatefulTable<DetailEntryWithCounter>,
     pub entry_count: usize,
     pub nacha_file: &'a mut NachaFile,
+    pub show_popup: bool,
 }
 
 impl<'a> App<'a> {
@@ -20,6 +21,7 @@ impl<'a> App<'a> {
             nacha_file: nacha_file,
             entries: StatefulTable::with_items(entries),
             entry_count: count,
+            show_popup: false,
         }
     }
     pub fn on_key(&mut self, c: char) {
@@ -38,6 +40,9 @@ impl<'a> App<'a> {
             }
             'l' => {
                 self.entries.jump_next();
+            }
+            'o' => {
+                self.show_popup = !self.show_popup;
             }
             _ => {}
         }

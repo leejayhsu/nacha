@@ -11,7 +11,7 @@ use tui::{
     symbols,
     text::{Span, Spans},
     widgets::canvas::{Canvas, Line, Map, MapResolution, Rectangle},
-    widgets::{Block, Borders, Cell, Paragraph, Row, Table, Wrap},
+    widgets::{Block, Borders, Cell, Clear, Paragraph, Row, Table, Wrap},
     Frame,
 };
 
@@ -263,6 +263,13 @@ where
             Constraint::Ratio(6, 100),
         ]);
     f.render_stateful_widget(table, area, &mut app.entries.state);
+
+    if app.show_popup {
+        let block = Block::default().title("Popup").borders(Borders::ALL);
+        let area = centered_rect(60, 20, f.size());
+        f.render_widget(Clear, area); //this clears out the background
+        f.render_widget(block, area);
+    }
 }
 
 fn parse_entry_into_cells(e: &DetailEntryWithCounter) -> Vec<Cell<'static>> {
@@ -357,4 +364,31 @@ fn make_header() -> Vec<Cell<'static>> {
                 .fg(Color::Cyan),
         )),
     ]
+}
+
+// helper function to create a centered rect using up certain percentage of the available rect `r`
+fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
+    let popup_layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints(
+            [
+                Constraint::Percentage((100 - percent_y) / 2),
+                Constraint::Percentage(percent_y),
+                Constraint::Percentage((100 - percent_y) / 2),
+            ]
+            .as_ref(),
+        )
+        .split(r);
+
+    Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints(
+            [
+                Constraint::Percentage((100 - percent_x) / 2),
+                Constraint::Percentage(percent_x),
+                Constraint::Percentage((100 - percent_x) / 2),
+            ]
+            .as_ref(),
+        )
+        .split(popup_layout[1])[1]
 }
