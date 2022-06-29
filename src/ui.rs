@@ -1,9 +1,9 @@
-use crate::app::App;
-use crate::lib::Currency;
-use crate::lib::DetailEntry;
+use crate::app::{App, StatefulTable};
+use crate::lib::{Addendum, Currency, DetailEntry};
 use crate::term::DetailEntryWithCounter;
 use std::cmp::Ordering;
 use thousands::Separable;
+use tui::text::Text;
 use tui::{
     backend::Backend,
     layout::{Constraint, Direction, Layout, Rect},
@@ -266,14 +266,71 @@ where
 
     if app.show_popup {
         let block = Block::default().title("Popup").borders(Borders::ALL);
-        let area = centered_rect(60, 20, f.size());
+        let area = centered_rect(95, 50, f.size());
         let text = vec![Spans::from(vec![Span::raw(
             "display stateful table of addenda here",
         )])];
-        let paragraph = Paragraph::new(text).block(block).wrap(Wrap { trim: true });
-        f.render_widget(Clear, area); //this clears out the background
-        f.render_widget(paragraph, area);
+        // todo: add counter to addenda items
+        let i = match app.entries.state.selected() {
+            Some(i) => {
+                let addenda_items: Vec<Row> = app
+                    .addenda_popup
+                    .items
+                    .iter()
+                    .map(|e| {
+                        let cells = parse_addendum_into_cells(e);
+                        Row::new(cells)
+                    })
+                    .collect();
+
+                let addenda_table = Table::new(addenda_items)
+                    .block(
+                        Block::default()
+                            .title(Span::styled(
+                                "Addenda Info",
+                                Style::default()
+                                    .fg(Color::Magenta)
+                                    .add_modifier(Modifier::BOLD),
+                            ))
+                            .borders(Borders::ALL),
+                    )
+                    .highlight_style(Style::default().add_modifier(Modifier::BOLD))
+                    .highlight_symbol("> ")
+                    .header(Row::new(make_addenda_header()))
+                    .widths(&[
+                        Constraint::Ratio(8, 100),
+                        Constraint::Ratio(65, 100),
+                        Constraint::Ratio(10, 100),
+                        Constraint::Ratio(10, 100),
+                    ]);
+                f.render_widget(Clear, area); // this clears out the background
+                f.render_stateful_widget(addenda_table, area, &mut app.addenda_popup.state);
+            }
+            None => {}
+        };
     }
+}
+
+fn parse_addendum_into_cells(a: &Addendum) -> Vec<Cell<'static>> {
+    let cells = vec![
+        Cell::from(Span::styled(
+            format!("{}", a.addenda_type_code),
+            Style::default().fg(Color::Reset),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", a.payment_related_info),
+            Style::default().fg(Color::Reset),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", a.addenda_sequence_number),
+            Style::default().fg(Color::Reset),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", a.entry_detail_sequence_number),
+            Style::default().fg(Color::Reset),
+        )),
+    ];
+    return cells;
 }
 
 fn parse_entry_into_cells(e: &DetailEntryWithCounter) -> Vec<Cell<'static>> {
@@ -321,6 +378,35 @@ fn parse_entry_into_cells(e: &DetailEntryWithCounter) -> Vec<Cell<'static>> {
         )),
     ];
     return cells;
+}
+
+fn make_addenda_header() -> Vec<Cell<'static>> {
+    vec![
+        Cell::from(Span::styled(
+            format!("{}", "Type Code"),
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", "Payment Related Information"),
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", "Seq Num"),
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", "Entry Seq Num"),
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        )),
+    ]
 }
 
 fn make_header() -> Vec<Cell<'static>> {

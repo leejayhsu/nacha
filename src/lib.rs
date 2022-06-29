@@ -329,11 +329,11 @@ impl DetailEntry {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Addendum {
-    record_type_code: String,
-    addenda_type_code: String,
-    payment_related_info: String,
-    addenda_sequence_number: String,
-    entry_detail_sequence_number: String,
+    pub record_type_code: String,
+    pub addenda_type_code: String,
+    pub payment_related_info: String,
+    pub addenda_sequence_number: String,
+    pub entry_detail_sequence_number: String,
 }
 
 impl Addendum {

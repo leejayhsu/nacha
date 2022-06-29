@@ -1,4 +1,4 @@
-use crate::lib::{Currency, DetailEntry, NachaFile};
+use crate::lib::{Addendum, Currency, DetailEntry, NachaFile};
 use crate::term::DetailEntryWithCounter;
 use tui::{
     style::{Color, Modifier, Style},
@@ -11,6 +11,7 @@ pub struct App<'a> {
     pub entry_count: usize,
     pub nacha_file: &'a mut NachaFile,
     pub show_popup: bool,
+    pub addenda_popup: StatefulTable<Addendum>,
 }
 
 impl<'a> App<'a> {
@@ -22,6 +23,7 @@ impl<'a> App<'a> {
             entries: StatefulTable::with_items(entries),
             entry_count: count,
             show_popup: false,
+            addenda_popup: StatefulTable::new(),
         }
     }
     pub fn on_key(&mut self, c: char) {
@@ -30,22 +32,44 @@ impl<'a> App<'a> {
                 self.should_quit = true;
             }
             'j' => {
-                self.entries.next();
+                if self.show_popup {
+                    self.addenda_popup.next();
+                } else {
+                    self.entries.next();
+                }
             }
             'k' => {
-                self.entries.previous();
+                if self.show_popup {
+                    self.addenda_popup.previous();
+                } else {
+                    self.entries.previous();
+                }
             }
             'h' => {
-                self.entries.jump_previous();
+                if self.show_popup {
+                    self.addenda_popup.jump_previous();
+                } else {
+                    self.entries.jump_previous();
+                }
             }
             'l' => {
-                self.entries.jump_next();
+                if self.show_popup {
+                    self.addenda_popup.jump_next();
+                } else {
+                    self.entries.jump_next();
+                }
             }
             'o' => {
                 let i = match self.entries.state.selected() {
                     Some(i) => {
                         if self.entries.items[i].entry.has_addenda() {
                             self.show_popup = !self.show_popup;
+                        }
+                        if self.addenda_popup.has_items() && !self.show_popup {
+                            self.addenda_popup.clear_items();
+                        } else if !self.addenda_popup.has_items() && self.show_popup {
+                            self.addenda_popup
+                                .add_items(self.entries.items[i].entry.addenda.clone())
                         }
                     }
                     None => {}
@@ -79,6 +103,29 @@ pub struct StatefulTable<T> {
 }
 
 impl<T> StatefulTable<T> {
+    pub fn new() -> StatefulTable<T> {
+        StatefulTable {
+            state: TableState::default(),
+            items: Vec::new(),
+            jump_size: 1,
+        }
+    }
+
+    /// used with popup
+    pub fn clear_items(&mut self) {
+        self.items = Vec::new();
+    }
+
+    pub fn has_items(&self) -> bool {
+        self.items.len() > 0
+    }
+
+    pub fn add_items(&mut self, items: Vec<T>) {
+        let jump_size = items.len() / 10;
+        self.items = items;
+        self.jump_size = jump_size;
+    }
+
     pub fn with_items(items: Vec<T>) -> StatefulTable<T> {
         let jump_size = items.len() / 10;
         StatefulTable {
