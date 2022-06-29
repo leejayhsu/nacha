@@ -226,7 +226,94 @@ where
     B: Backend,
 {
     let entries = &app.entries;
-    let header_cells = vec![
+    let header_cells = make_header();
+    let header = Row::new(header_cells);
+
+    let items: Vec<Row> = app
+        .entries
+        .items
+        .iter()
+        .map(|e| {
+            let cells = parse_entry_into_cells(e);
+            Row::new(cells)
+        })
+        .collect();
+
+    let table = Table::new(items)
+        .block(
+            Block::default()
+                .title(Span::styled(
+                    "File Contents",
+                    Style::default()
+                        .fg(Color::Magenta)
+                        .add_modifier(Modifier::BOLD),
+                ))
+                .borders(Borders::ALL),
+        )
+        .highlight_style(Style::default().add_modifier(Modifier::BOLD))
+        .highlight_symbol("> ")
+        .header(header)
+        .widths(&[
+            Constraint::Ratio(6, 100),
+            Constraint::Ratio(6, 100),
+            Constraint::Ratio(20, 100),
+            Constraint::Ratio(12, 100),
+            Constraint::Ratio(15, 100),
+            Constraint::Ratio(10, 100),
+            Constraint::Ratio(6, 100),
+        ]);
+    f.render_stateful_widget(table, area, &mut app.entries.state);
+}
+
+fn parse_entry_into_cells(e: &DetailEntryWithCounter) -> Vec<Cell<'static>> {
+    let code = &e.entry.transaction_code[..];
+    let color = match code {
+        "22" | "32" | "42" | "52" => Color::Green,
+        "27" | "37" | "47" => Color::Red,
+        _ => Color::Reset,
+    };
+    let cells = vec![
+        Cell::from(Span::styled(
+            format!("{}", e.counter),
+            Style::default().fg(Color::Reset),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", e.entry.transaction_code),
+            Style::default().fg(color),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", e.entry.individual_name),
+            Style::default().fg(Color::Reset),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", e.entry.dfi_account_number),
+            Style::default().fg(Color::Reset),
+        )),
+        Cell::from(Span::styled(
+            format!("{}", e.entry.trace_number),
+            Style::default().fg(Color::Reset),
+        )),
+        Cell::from(Span::styled(
+            format!("{:>13}", e.entry.amount.pretty_dollars_cents()),
+            Style::default().fg(color),
+        )),
+        Cell::from(Span::styled(
+            format!(
+                "{:^8}",
+                match e.entry.addenda.len().cmp(&0) {
+                    Ordering::Less => "",
+                    Ordering::Equal => "",
+                    Ordering::Greater => "✅",
+                }
+            ),
+            Style::default().fg(color),
+        )),
+    ];
+    return cells;
+}
+
+fn make_header() -> Vec<Cell<'static>> {
+    vec![
         Cell::from(Span::styled(
             format!("{}", "Entry #"),
             Style::default()
@@ -269,84 +356,5 @@ where
                 .add_modifier(Modifier::BOLD)
                 .fg(Color::Cyan),
         )),
-    ];
-    let header = Row::new(header_cells);
-
-    let items: Vec<Row> = app
-        .entries
-        .items
-        .iter()
-        .map(|e| {
-            let code = &e.entry.transaction_code[..];
-            let color = match code {
-                "22" | "32" | "42" | "52" => Color::Green,
-                "27" | "37" | "47" => Color::Red,
-                _ => Color::Reset,
-            };
-            let cells = vec![
-                Cell::from(Span::styled(
-                    format!("{}", e.counter),
-                    Style::default().fg(Color::Reset),
-                )),
-                Cell::from(Span::styled(
-                    format!("{}", e.entry.transaction_code),
-                    Style::default().fg(color),
-                )),
-                Cell::from(Span::styled(
-                    format!("{}", e.entry.individual_name),
-                    Style::default().fg(Color::Reset),
-                )),
-                Cell::from(Span::styled(
-                    format!("{}", e.entry.dfi_account_number),
-                    Style::default().fg(Color::Reset),
-                )),
-                Cell::from(Span::styled(
-                    format!("{}", e.entry.trace_number),
-                    Style::default().fg(Color::Reset),
-                )),
-                Cell::from(Span::styled(
-                    format!("{:>13}", e.entry.amount.pretty_dollars_cents()),
-                    Style::default().fg(color),
-                )),
-                Cell::from(Span::styled(
-                    format!(
-                        "{:^8}",
-                        match e.entry.addenda.len().cmp(&0) {
-                            Ordering::Less => "",
-                            Ordering::Equal => "",
-                            Ordering::Greater => "✅",
-                        }
-                    ),
-                    Style::default().fg(color),
-                )),
-            ];
-            Row::new(cells)
-        })
-        .collect();
-    // table_stuff.extend(items);
-
-    let table = Table::new(items)
-        .block(
-            Block::default()
-                .title(Span::styled(
-                    "File Contents",
-                    Style::default()
-                        .fg(Color::Magenta)
-                        .add_modifier(Modifier::BOLD),
-                ))
-                .borders(Borders::ALL),
-        )
-        .highlight_style(Style::default().add_modifier(Modifier::BOLD))
-        .highlight_symbol("> ")
-        .header(header)
-        .widths(&[
-            Constraint::Ratio(6, 100),
-            Constraint::Ratio(6, 100),
-            Constraint::Ratio(20, 100),
-            Constraint::Ratio(12, 100),
-            Constraint::Ratio(15, 100),
-            Constraint::Ratio(10, 100),
-            Constraint::Ratio(6, 100),
-        ]);
-    f.render_stateful_widget(table, area, &mut app.entries.state);
+    ]
 }
