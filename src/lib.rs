@@ -1,7 +1,22 @@
 use chrono::{NaiveDate, NaiveTime};
 use log::{debug, info};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use thousands::Separable;
+
+const FORMAT: &'static str = "%H:%M";
+
+pub fn hh_mm_format<S>(time: &Option<NaiveTime>, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    match time {
+        Some(t) => {
+            let s = format!("{}", t.format(FORMAT));
+            serializer.serialize_str(&s)
+        }
+        None => serializer.serialize_str(""),
+    }
+}
 
 pub trait Currency {
     fn pretty_dollars_cents(&self) -> String;
@@ -92,6 +107,7 @@ pub struct FileHeader {
     pub immediate_destination: String,
     pub immediate_origin: String,
     pub file_creation_date: Option<NaiveDate>,
+    #[serde(serialize_with = "hh_mm_format")]
     pub file_creation_time: Option<NaiveTime>,
     pub file_id_modifier: String,
     pub record_size: String,

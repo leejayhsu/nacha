@@ -46,7 +46,7 @@ nacha my_nacha.ach my_nacha.json
     "immediate_destination": "231380104",
     "immediate_origin": "0121042882",
     "file_creation_date": "2019-06-24",
-    "file_creation_time": "00:00:00",
+    "file_creation_time": "00:00",
     "file_id_modifier": "A",
     "record_size": "094",
     "blocking_factor": "10",
@@ -120,14 +120,13 @@ nacha my_nacha.ach my_nacha.json
 nacha my_nacha.ach my_nacha.yaml
 ```
 ```yaml
----
 file_header:
   record_type_code: "1"
   priority_code: "01"
   immediate_destination: "231380104"
   immediate_origin: "0121042882"
   file_creation_date: 2019-06-24
-  file_creation_time: "00:00:00"
+  file_creation_time: "00:00"
   file_id_modifier: A
   record_size: "094"
   blocking_factor: "10"
@@ -184,5 +183,4 @@ file_control:
   total_debit: 100000000
   total_credit: 0
   reserved: ""
-
 ```
