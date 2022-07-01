@@ -22,8 +22,8 @@ struct Cli {
 }
 
 impl Cli {
-    fn output(self, data: &lib::NachaFile) {
-        if let Some(output_path) = self.output {
+    fn output(&self, data: &lib::NachaFile) {
+        if let Some(output_path) = &self.output {
             let ext = output_path.extension().and_then(OsStr::to_str);
             match ext {
                 Some("json") => {
@@ -59,7 +59,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut nacha_file = lib::NachaFile::new(content);
 
     cli.output(&nacha_file);
-    let tick_rate = Duration::from_millis(1000);
-    run(tick_rate, &mut nacha_file)?;
+
+    if let None = cli.output {
+        run(Duration::from_millis(1000), &mut nacha_file)?;
+    }
+
     Ok(())
 }
